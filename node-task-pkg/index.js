@@ -10,7 +10,14 @@ const plat = os.platform();
 const { readdir } = require('node:fs/promises');
 const { readFile } = require('node:fs/promises');
 
-const getWinProc = require('./winAPI.node');
+switch (plat) {
+  case 'win32':
+    const getWinProc = require('./winAPI.node');
+    break;
+  case 'darwin':
+    const getMacProc = require('./darwinAPI.node');
+    break;
+}
 /**
  * @typedef {Object} ProcessOutputFormat
  * @property {Array.<string[]>} processes - List of processes
@@ -103,8 +110,7 @@ exports.getProcList = async () => {
       case 'linux':
         return await getLinuxProc();
       case 'darwin':
-        result = await execProm("ps -ec -o pid,command | awk '{printf \"%s,\",$1;$1=\"\";print substr($0,2)}'"); // TODO: same fix as for linux
-        return { processes: result.stdout.trim().split('\n').map((x) => x.trim().split(',')), error: result.stderr };
+        return getMacProc();
       default:
         throw new OperatingSystemNotSupportedException();
     }
@@ -176,19 +182,3 @@ exports.killProcByPID = async (pid) => {
   }
   return { result: result.stdout, error: result.stderr };
 };
-
-// exports.getProcList().then((result) => {
-//  console.log(result.processes);
-// });
-/*
-process.stdin.setEncoding('utf8');
-let name;
-process.stdin.on('readable', () => {
-  name = process.stdin.read();
-  if (name !== null) {
-    exports.killProcByPID(name).then((result) => {
-      console.log(result);
-    });
-  }
-});
-*/

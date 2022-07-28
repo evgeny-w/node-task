@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 
+
 napi_value FindPrimes(napi_env env, napi_callback_info info) {
 	size_t argc = 1;
 	napi_value args[1];
@@ -43,7 +44,6 @@ napi_value GetProcessList(napi_env env, napi_callback_info info) {
 	napi_get_null(env, &nNull);
 	napi_create_object(env, &result);
 	napi_create_array(env, &procArr);
-	napi_create_array(env, &procVal);
 
 	napi_set_named_property(env, result, "processes", nNull);
 	napi_set_named_property(env, result, "error", nNull);
