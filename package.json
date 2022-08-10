@@ -5,7 +5,8 @@
   "main": "sandbox_app/main.js",
   "scripts": {
     "start": "electron .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "cd lib&&node-gyp build&&cd .."
   },
   "author": "ev",
   "license": "",

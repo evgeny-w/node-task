@@ -24,6 +24,7 @@ out.addEventListener('click', async (evt) => {
       .killProcByPID(node.parentElement.parentElement.cells[1].innerText);
     if (result.result !== null) {
       node.parentElement.parentElement.remove();
+      alert(result.result);
     } else {
       alert(result.error);
     }
