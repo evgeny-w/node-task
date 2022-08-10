@@ -2,10 +2,10 @@
   "name": "node-task",
   "version": "1.0.0",
   "description": "A cross-platform electron app that allows running task management.",
-  "main": "main.js",
+  "main": "sandbox_app/main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
   },
   "author": "ev",
   "license": "",

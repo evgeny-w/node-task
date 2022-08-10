@@ -4,25 +4,16 @@ const out = document.getElementById('out');
 
 start.addEventListener('click', async () => {
   const result = await window.electronAPI.getProcList(name.value);
-  if (result.stdout !== 'ERROR') {
-    const tableList = result.stdout;
+  if (result.processes !== null) {
+    const tableList = result.processes;
     for (let i = 0; i < tableList.length; i += 1) {
-      const tableValues = tableList[i].trim().split(',');
       const row = out.insertRow();
-      if (i > 0) {
-        row.insertCell(0).innerHTML = '<button type="button" name="kill">Close</button>';
-        row.insertCell(1).innerHTML = tableValues.shift().trim();
-        row.insertCell(2).innerHTML = tableValues.join(',').trim();
-      } else {
-        row.innerHTML = '<tr><td></td>';
-        for (let j = 0; j < 2; j += 1) {
-          row.innerHTML += `<td><b>${tableValues[j].trim()}</td></b>`;
-        }
-        row.innerHTML += '</tr>';
-      }
+      row.insertCell(0).innerHTML = '<button type="button" name="kill">Close</button>';
+      row.insertCell(1).innerHTML = tableList[i].shift().trim();
+      row.insertCell(2).innerHTML = tableList[i].join(',').trim();
     }
   } else {
-    out.innerText = result.stderr;
+    out.innerText = result.error;
   }
 });
 
@@ -31,10 +22,10 @@ out.addEventListener('click', async (evt) => {
   if (node.name === 'kill') {
     const result = await window.electronAPI
       .killProcByPID(node.parentElement.parentElement.cells[1].innerText);
-    if (result.stdout !== 'ERROR') {
+    if (result.result !== null) {
       node.parentElement.parentElement.remove();
     } else {
-      alert(result.stderr);
+      alert(result.error);
     }
   }
 });

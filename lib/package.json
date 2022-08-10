@@ -1,0 +1,20 @@
+{
+   "name": "node-task-mgr",
+   "version": "1.0.2",
+   "description": "A cross-platform node module that provides tools to get and kill running process info",
+   "main": "index.js",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/evgeny-w/node-task.git"
+   },
+   "keywords": [
+      "task",
+      "task-manager"
+   ],
+   "author": "Evgeny",
+   "license": "MIT",
+   "bugs": {
+      "url": "https://github.com/evgeny-w/node-task/issues"
+   },
+   "homepage": "https://github.com/evgeny-w/node-task#readme"
+}
