@@ -108,4 +108,4 @@ dist
 toLinux.bat
 toWin.bat
 Sample Process.exe
-build/
+build
