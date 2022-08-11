@@ -2,19 +2,30 @@
   "targets": [
     {
       "target_name": "winAPI",
-      "conditions":[
-        ["OS==\"win\"",{
-          "sources":["winAPI.cc"]
-        }]
-      ]
+      "sources":["winAPI.cc"],
     },
     {
       "target_name": "darwinAPI",
-      "conditions":[
-        ["OS==\"mac\"",{
-          "sources":["darwinAPI.cc"]
-        }]
-      ]
+      "sources":["darwinAPI.cc"]
     }
-  ]
+  ],
+  'conditions': [
+          ['OS=="linux"', {
+            'defines': [
+              'LINUX_DEFINE',
+            ],
+          }],
+          ['OS=="win"', {
+            'defines': [
+              'WINDOWS_SPECIFIC_DEFINE',
+            ],
+          }
+        ],
+          ['OS=="mac"', {
+            'defines': [
+              'MAC_DEFINE',
+            ],
+          }
+        ]
+      ]
 }
