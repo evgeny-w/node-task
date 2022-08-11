@@ -1,6 +1,7 @@
-#include <node.h>
+
 #include <node_api.h>
 
+#ifdef __APPLE__
 
 #include <assert.h>
 #include <errno.h>
@@ -162,5 +163,13 @@ napi_value init(napi_env env, napi_value exports) {
 
     return result;
 }
+
+#else
+
+napi_value init(napi_env env, napi_value exports) {
+    return exports;
+}
+
+#endif
 
 NAPI_MODULE(NODE_GYP_MODULE_NAME, init)

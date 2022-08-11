@@ -1,14 +1,42 @@
+#include <node_api.h>
+
+#ifdef _WIN32
+
 #include <stdio.h>
 #include <windows.h>
 #include <tlhelp32.h>
 
-#include <node_api.h>
+//Returns the last Win32 error, in string format. Returns an empty string if there is no error.
+char* GetLastErrorAsString()
+{
+	//Get the error message ID, if any.
+	DWORD errorMessageID = ::GetLastError();
+	if (errorMessageID == 0) {
+		return ""; //No error message has been recorded
+	}
 
-void raiseErr(napi_env env, char* errCode, napi_value* err, napi_value* result) {
-	sprintf(errCode, "ERROR: Windows API %d", GetLastError());
+	LPSTR messageBuffer = nullptr;
+
+	//Ask Win32 to give us the string version of that message ID.
+	//The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
+	size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+	char* message = messageBuffer + '\0';
+
+	//Free the Win32's string's buffer.
+	LocalFree(messageBuffer);
+
+	return message;
+}
+
+void raiseErrCode(napi_env env, char* errCode, napi_value* err, napi_value* result, int lineNbr) {
+	sprintf(errCode, "ERROR on line %d: %s", lineNbr, GetLastErrorAsString());
 	napi_create_string_utf8(env, errCode, NAPI_AUTO_LENGTH, err);
 	napi_set_named_property(env, *result, "error", *err);
 }
+
+#define raiseErr(env, errCode, err, result) raiseErrCode(env, errCode, err, result, __LINE__)
 
 napi_value GetProcessList(napi_env env, napi_callback_info info) {
 
@@ -40,6 +68,7 @@ napi_value GetProcessList(napi_env env, napi_callback_info info) {
 	entry.dwSize = sizeof(PROCESSENTRY32);
 	if (Process32First(handle, &entry) == 0) {
 		raiseErr(env, helper, &err, &result);
+		CloseHandle(handle);
 		return result;
 	}
 
@@ -103,11 +132,20 @@ napi_value KillProcessByPID_hard(napi_env env, napi_callback_info info) {
 
 	HANDLE handle = OpenProcess(PROCESS_TERMINATE, false, PID);
 	if (handle == 0) {
-		raiseErr(env, helper, &st, &result);
+		if (GetLastError() == ERROR_INVALID_PARAMETER) {
+			napi_create_string_utf8(env, "SUCCESS: Process does not exist", NAPI_AUTO_LENGTH, &st); //?? How to convey this
+			napi_set_named_property(env, result, "result", st);
+			napi_create_string_utf8(env, "ERROR: Process does not exist", NAPI_AUTO_LENGTH, &st);
+			napi_set_named_property(env, result, "error", st);
+		}
+		else {
+			raiseErr(env, helper, &st, &result);
+		}
 		return result;
 	}
 	if (TerminateProcess(handle, 0xDEAD) == 0) {
 		raiseErr(env, helper, &st, &result);
+		CloseHandle(handle);
 		return result;
 	}
 
@@ -137,6 +175,7 @@ napi_value KillProcessByPID_soft(napi_env env, napi_callback_info info) {
 
 	napi_set_named_property(env, result, "result", nNull);
 	napi_set_named_property(env, result, "error", nNull);
+	
 	winFound = 0;
 	if (EnumWindows(enumWindowCb, PID) == 0) {
 		raiseErr(env, helper, &st, &result);
@@ -149,11 +188,18 @@ napi_value KillProcessByPID_soft(napi_env env, napi_callback_info info) {
 	else {
 		HANDLE handle = OpenProcess(PROCESS_TERMINATE, false, PID);
 		if (handle == 0) {
-			raiseErr(env, helper, &st, &result);
+			if (GetLastError() == ERROR_INVALID_PARAMETER) {
+				napi_create_string_utf8(env, "ERROR: Process does not exist", NAPI_AUTO_LENGTH, &st);
+				napi_set_named_property(env, result, "error", st);
+			}
+			else {
+				raiseErr(env, helper, &st, &result);
+			}
 			return result;
 		}
 		if (TerminateProcess(handle, 0xDEAD) == 0) {
 			raiseErr(env, helper, &st, &result);
+			CloseHandle(handle);
 			return result;
 		}
 		CloseHandle(handle);
@@ -189,20 +235,22 @@ napi_value IsProcessRunning(napi_env env, napi_callback_info info) {
 
 	HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION, false, PID);
 	if (handle == 0) {
-		raiseErr(env, helper, &st, &result);
+		if (GetLastError() == ERROR_INVALID_PARAMETER) {
+			napi_set_named_property(env, result, "result", nFalse);
+		}
+		else {
+			raiseErr(env, helper, &st, &result);
+		}
 		return result;
 	}
 	
 	DWORD dwResult = 0;
 	if (GetExitCodeProcess(handle,&dwResult) == 0) {
-		DWORD errCode = GetLastError();
-		if (errCode != 87){
-			sprintf(helper, "ERROR: Windows API %d", GetLastError());
-			napi_create_string_utf8(env, helper, NAPI_AUTO_LENGTH, &st);
-			napi_set_named_property(env, result, "error", st);
+		if (GetLastError() != ERROR_INVALID_PARAMETER && GetLastError() != ERROR_INVALID_HANDLE) {
+			raiseErr(env, helper, &st, &result);
+			CloseHandle(handle);
+			return result;
 		}
-		//raiseErr(env, helper, &st, &result);
-		//return result;
 	}
 	CloseHandle(handle);
 
@@ -265,6 +313,12 @@ napi_value init(napi_env env, napi_value exports) {
 
 }
 
+#else
 
+napi_value init(napi_env env, napi_value exports) {
+	return exports;
+}
+
+#endif
 
 NAPI_MODULE(NODE_GYP_MODULE_NAME, init)
