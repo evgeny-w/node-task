@@ -8,7 +8,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
+#include <signal.h>
 
 typedef struct kinfo_proc kinfo_proc;
 
@@ -156,12 +159,61 @@ napi_value GetProcessList(napi_env env, napi_callback_info info) {
   return result; 
 }
 
-napi_value init(napi_env env, napi_value exports) {
+napi_value killProcessByPID(napi_env env, napi_callback_info info) {
+    char helper[100]; //convert DWORD to string
     napi_value result;
-
-    napi_create_function(env, nullptr, 0, GetProcessList, nullptr, &result);
-
+    napi_value st;
+    napi_value nNull;
+    size_t argc = 1;
+    napi_value args[1];
+    int PID;
+    
+    napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+    napi_get_value_int32(env, args[0], &PID);
+    
+    napi_get_null(env, &nNull);
+    napi_create_object(env, &result);
+    
+    napi_set_named_property(env, result, "result", nNull);
+    napi_set_named_property(env, result, "error", nNull);
+    
+    if (kill(PID,SIGTERM) == -1){
+        sprintf(helper, "ERRNO: %s", strerror(errno));
+        napi_create_string_utf8(env, helper, NAPI_AUTO_LENGTH, &st);
+        napi_set_named_property(env, result, "error", st);
+        return result;
+    }
+    
+    sprintf(helper, "SUCCESS: The process with PID %d has been terminated", PID);
+    napi_create_string_utf8(env, helper, NAPI_AUTO_LENGTH, &st);
+    napi_set_named_property(env, result, "result", st);
     return result;
+}
+
+
+napi_value init(napi_env env, napi_value exports) {
+    napi_status status;
+    napi_property_attributes attr = (napi_property_attributes)(napi_writable | napi_enumerable | napi_configurable);
+    napi_property_descriptor desc = {
+        "getProcessList", NULL,
+        GetProcessList, NULL, NULL, NULL,
+        attr,
+        NULL
+    };
+    status = napi_define_properties(env, exports, 1, &desc);
+    if (status != napi_ok) return NULL;
+    
+    //napi_property_attributes attr = (napi_property_attributes)(napi_writable | napi_enumerable | napi_configurable);
+    desc = {
+        "killProcByPID", NULL,
+        killProcessByPID, NULL, NULL, NULL,
+        attr,
+        NULL
+    };
+    status = napi_define_properties(env, exports, 1, &desc);
+    if (status != napi_ok) return NULL;
+    
+    return exports;
 }
 
 #else
