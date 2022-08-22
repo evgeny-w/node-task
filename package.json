@@ -5,12 +5,12 @@
   "main": "sandbox_app/main.js",
   "scripts": {
     "start": "electron .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "cd lib&&node-gyp build&&cd .."
   },
   "author": "ev",
   "license": "",
   "dependencies":{
-    "electron": "^19.0.8"
   },
   "devDependencies": {
     "eslint": "^8.2.0",
@@ -18,6 +18,24 @@
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.28.0",
-    "eslint-plugin-react-hooks": "^4.3.0"
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "electron-builder": "^23.1.0",
+    "electron": "^19.0.8"
+  },
+  "build": {
+    "win": {
+      "target": {
+        "target": "nsis",
+        "arch": "x64"
+      }
+    },
+    "mac": {
+      "target": {
+        "target": "default",
+        "arch": [
+          "x64"
+        ]
+      }
+    }
   }
 }
