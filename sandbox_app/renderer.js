@@ -1,16 +1,15 @@
 const start = document.getElementById('start');
-const name = document.getElementById('name');
 const out = document.getElementById('out');
 
 start.addEventListener('click', async () => {
-  const result = await window.electronAPI.getProcList(name.value);
+  const result = await window.electronAPI.getProcList();
   if (result.processes !== null) {
     const tableList = result.processes;
     for (let i = 0; i < tableList.length; i += 1) {
       const row = out.insertRow();
       row.insertCell(0).innerHTML = '<button type="button" name="kill">Close</button>';
-      row.insertCell(1).innerHTML = tableList[i].shift().trim();
-      row.insertCell(2).innerHTML = tableList[i].join(',').trim();
+      row.insertCell(1).innerHTML = tableList[i][0];
+      row.insertCell(2).innerHTML = tableList[i][1];
     }
   } else {
     out.innerText = result.error;
