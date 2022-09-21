@@ -7,6 +7,10 @@
       "type": "git",
       "url": "git+https://github.com/evgeny-w/node-task.git"
    },
+   "bin" : {
+      "getProcessListMac" : "./bin/getProcessListMac",
+      "getProcessListWindows": "./bin/getProcessListWindows.exe"
+   },
    "keywords": [
       "task",
       "task-manager"
