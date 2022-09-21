@@ -15,6 +15,6 @@ func main() {
 	}
 
 	for pp := range ps {
-		fmt.Printf("%d %s\n", ps[pp].Pid(), ps[pp].Executable())
+		fmt.Printf("%d, %s\n", ps[pp].Pid(), ps[pp].Executable())
 	}
 }
