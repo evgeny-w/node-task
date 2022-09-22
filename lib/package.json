@@ -1,14 +1,14 @@
 {
    "name": "node-task-mgr",
-   "version": "1.1.1",
+   "version": "1.1.5",
    "description": "A cross-platform node module that provides tools to get and kill running process info",
    "main": "index.js",
    "repository": {
       "type": "git",
       "url": "git+https://github.com/evgeny-w/node-task.git"
    },
-   "bin" : {
-      "getProcessListMac" : "./bin/getProcessListMac",
+   "bin": {
+      "getProcessListMac": "./bin/getProcessListMac",
       "getProcessListWindows": "./bin/getProcessListWindows.exe"
    },
    "keywords": [
