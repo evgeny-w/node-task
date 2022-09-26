@@ -7,10 +7,6 @@
       "type": "git",
       "url": "git+https://github.com/evgeny-w/node-task.git"
    },
-   "bin": {
-      "getProcessListDarwin": "bin/getProcessListDarwin",
-      "getProcessListWin32": "bin/getProcessListWin32.exe"
-   },
    "keywords": [
       "task",
       "task-manager"
