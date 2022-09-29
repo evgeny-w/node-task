@@ -1,6 +1,6 @@
 {
    "name": "node-task-mgr",
-   "version": "2.0.0",
+   "version": "2.0.1",
    "description": "A cross-platform node module that provides tools to get and kill running process info",
    "main": "index.js",
    "repository": {
