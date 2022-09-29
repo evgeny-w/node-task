@@ -12,7 +12,7 @@ func main() {
 	ps, err := ps.Processes()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error in get processes: %w", err)
+		fmt.Fprintf(os.Stderr, "Error in get processes: %v", err)
 		return
 	}
 
