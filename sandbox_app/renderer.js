@@ -3,7 +3,7 @@ const name = document.getElementById('name');
 const out = document.getElementById('out');
 
 start.addEventListener('click', async () => {
-  const result = await window.electronAPI.getProcList(name.value);
+  const result = await window.electronAPI.getProcessList(name.value);
   if (result.processes !== null) {
     const tableList = result.processes;
     for (let i = 0; i < tableList.length; i += 1) {
